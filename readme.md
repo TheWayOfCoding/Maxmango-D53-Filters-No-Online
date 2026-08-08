@@ -4,6 +4,14 @@ A fully offline, browser-based tool to create, edit, and preview custom color fi
 
 This project was extracted from a semi-local web tool and modified using AI to completely remove all online/cloud dependencies. It allows you to generate filter files (`.pro`, `.air`, `.dld`) entirely locally on your machine without relying on a website, internet connection, or server.
 
+## ⚠️ Disclaimer & Liability
+
+**USE AT YOUR OWN RISK.** 
+
+This software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and non-infringement. In no event shall the authors, contributors, or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.
+
+By using this tool, you acknowledge that you are loading third-party files onto your camera hardware. The creator of this repository is not responsible for any bricked devices, corrupted SD cards, lost photos, or unexpected behavior resulting from the use of generated filter files.
+
 ## 📷 Supported Cameras
 * **Pro Series (`.pro`)**: D53, D50, D80, V08 Pro
 * **Air Series (`.air`)**: D72, DC08
@@ -37,10 +45,3 @@ This tool has been heavily modified for offline integrity:
 * File imports are handled via the HTML5 `FileReader` API.
 * Unnecessary cloud-upload UI elements and telemetry features have been disabled and hidden.
 
-## ⚠️ Disclaimer & Liability
-
-**USE AT YOUR OWN RISK.** 
-
-This software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and non-infringement. In no event shall the authors, contributors, or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.
-
-By using this tool, you acknowledge that you are loading third-party files onto your camera hardware. The creator of this repository is not responsible for any bricked devices, corrupted SD cards, lost photos, or unexpected behavior resulting from the use of generated filter files.
