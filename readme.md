@@ -19,7 +19,7 @@ This project was extracted from a semi-local web tool and modified using AI to c
 ## 🚀 How to Use
 
 1. **Download/Clone** this repository to your local machine.
-2. **Open the HTML file** (e.g., `v2-LOCAL-DIY-Camera-Filters.html`) directly in your web browser (Chrome, Firefox, Safari, Edge).
+2. **Open the HTML file** (e.g., `DIY-Camera-Filters-Offline-Complete`) directly in your web browser (Chrome, Firefox, Safari, Edge).
 3. **Upload an Image**: Because this tool runs completely locally (`file://`), modern browsers block canvas manipulations on the pre-loaded thumbnails for security reasons. Click **"Change Picture"** and upload a photo from your computer to use as a preview base.
 4. **Select your Camera Model** from the dropdown.
 5. **Adjust the Sliders** until you are happy with the preview.
