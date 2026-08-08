@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<!-- saved from url=(0073)file:///J:/20260801-Maxmango-D53/Filters/v2-LOCAL-DIY-Camera-Filters.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIY Camera Filters (Local Only)</title>
+    <!-- CSS files locally -->
+    <link rel="stylesheet" href="./DIY-Camera-Filters-Offline-Complete_files/index.css">
+    <link rel="stylesheet" href="./DIY-Camera-Filters-Offline-Complete_files/style.css">
+    
+    <!-- Core Filter Logic Dependencies -->
+    <script src="./DIY-Camera-Filters-Offline-Complete_files/V105_filters.js.download"></script>
+    <script src="./DIY-Camera-Filters-Offline-Complete_files/D72Kamera.js.download"></script>
+    <style>
+        /* Hidden elements that are no longer needed but kept for structural integrity */
+        .helps, .up_img, .lvj_tc, .up_lj { display: none !important; }
+    </style>
+</head>
+<body>
+    <!-- Initial Warning Pop-up (Runs locally) -->
+    <div class="pop_up" style="display: none;">
+        <div class="pop_up_txt">
+            <h2 style="text-align: center;"> Are you ready? <br>
+                Before we proceed with the DIY, let's confirm one final thing.</h2>
+            <p style="text-align: center;">Please confirm that the camera is properly connected and ensure that you can
+                select the correct model in the website.</p>
+            <p style="text-align: center; font-size: 14px;background-color: #fff9e8;border-radius: 5px;
+            line-height: 38px; margin-top: 10px; ">Model mismatch may cause the filter to not work properly </p>
+            <p style="color: #3498db;font-size: 20px;text-align: center;margin-top: 20px;"> Let's start creating your own work！！！ </p>
+            <div>
+                <button class="buts_qd"><span>Confirm</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>DIY Camera Filter Tool (Offline Mode)</h1>
+        </header>
+        <div class="main-content">
+            <!-- Left: Preview Section -->
+            <div class="preview-section">
+                <h3>Preview effect</h3>
+                <div class="default-image-selector">
+                    <h4>Select default picture</h4>
+                    <div class="default-thumbnails">
+                        <!-- Default images -->
+                        <div class="thumbnail-item" data-src="./DIY-Camera-Filters_files/CITY.jpeg"> <span>CITY</span> </div>
+                        <div class="thumbnail-item" data-src="./DIY-Camera-Filters_files/GobiHighway.jpeg"> <span>GobiHighway</span> </div>
+                        <div class="thumbnail-item" data-src="./DIY-Camera-Filters_files/OutdoorAdventure.jpeg"> <span>OutdoorAdventure</span> </div>
+                        <div class="thumbnail-item" data-src="./DIY-Camera-Filters_files/Porto.jpeg"> <span>Porto</span> </div>
+                        <div class="thumbnail-item" data-src="./DIY-Camera-Filters_files/TheAlps.jpg"> <span>TheAlps</span> </div>
+                    </div>
+                </div>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-placeholder"> <span class="upload-icon">📁</span>
+                        <p><strong>Upload picture</strong></p>
+                        <p class="upload-hint">Click or drag an image into this area (Stays on your device)</p>
+                    </div>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+                
+                <!-- Display Container -->
+                <div class="image-preview" id="imagePreview" style="display: none; position: relative;">
+                    
+                    <!-- Fixed Toggle Button centered neatly above image -->
+                    <div style="text-align: center; margin-bottom: 15px; z-index: 10; position: relative;">
+                        <button class="btn btn-secondary yulan" style="cursor: pointer; width: auto; padding: 8px 16px;" disabled="">Click to toggle original/preview</button>
+                    </div>
+
+                    <!-- Clean Image Container to prevent formatting overlaps -->
+                    <div class="canvas-wrapper" style="text-align: center; width: 100%; margin-bottom: 20px;">
+                        
+                        <div id="filteredContainer" style="width: 100%; display: block;">
+                            <canvas id="filteredImage" style="max-width: 100%; height: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 4px; display: block; margin: 0 auto;"></canvas>
+                        </div>
+                        
+                        <div id="originalContainer" style="width: 100%; display: none;">
+                            <!-- OVERRIDING CSS: Inline styles force it back into document flow -->
+                            <canvas id="previewCanvas" style="position: static !important; transform: none !important; margin: 0 auto !important; max-width: 100%; height: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 4px; display: block;"></canvas>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <!-- Fixed formatting: strictly sits underneath the image -->
+                <div class="text_pian" style="clear: both; margin-top: 25px; padding-top: 15px;">
+                    <p>How to change the filter effect of the camera <br>
+                        1. Copy the filter file (.pro or .air) into the root directory of the camera. <br>
+                        2. When you start the camera, "LOAD" will appear for a second. <br>
+                        3. The camera can only load one custom file at a time. <br>
+                        4. Take some epic shots!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right: Control Panel -->
+            <div class="control-section">
+                <div class="filter-controls">
+                    <h4 class="filter_h4">
+                        <p>Filter Tool Controls</p>
+                    </h4>
+                    
+                    <div class="mode-selector">
+                        <label for="cameraSelect">Choose the model:</label>
+                        <div style="width: 200px;">
+                            <!-- Simplified Vanilla Select -->
+                            <select id="cameraSelect" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+                                <option value="" disabled="">Select camera model</option>
+                                <optgroup label="Pro Series">
+                                    <option value="extended" selected="">D53</option> <!-- Defaults to D53 -->
+                                    <option value="fine">D50</option>
+                                    <option value="professional">D80</option>
+                                    <option value="newV08Pro">V08 Pro</option>
+                                </optgroup>
+                                <optgroup label="Air Series">
+                                    <option value="D72Kamera">D72</option>
+                                    <option value="DC08Kamera">DC08</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-group">
+                        <label> Exposure: <span class="value-display" id="brightnessValue">0</span> </label>
+                        <input type="range" id="brightness" min="-255" max="255" value="0" step="1" disabled="">
+                    </div>
+                    <div class="slider-group">
+                        <label> Comparison: <span class="value-display" id="contrastValue">1</span> </label>
+                        <input type="range" id="contrast" min="0" max="2" value="1.0" step="0.1" disabled="">
+                    </div>
+                    <div class="slider-group">
+                        <label> Saturation: <span class="value-display" id="saturationValue">1</span> </label>
+                        <input type="range" id="saturation" min="0" max="4" value="1.0" step="0.1" disabled="">
+                    </div>
+                    <div class="slider-group">
+                        <label> Tone:<span class="value-display" id="hueValue">0</span> </label>
+                        <input type="range" id="hue" min="0" max="360" value="0" step="1" disabled="">
+                    </div>
+                    <div class="slider-group">
+                        <label> RGB R: <span class="value-display" id="gammaRValue">1</span> </label>
+                        <input type="range" id="gammaR" min="0.1" max="2" value="1.0" step="0.1" disabled="">
+                    </div>
+                    <div class="slider-group">
+                        <label> RGB G: <span class="value-display" id="gammaGValue">1</span> </label>
+                        <input type="range" id="gammaG" min="0.1" max="2" value="1.0" step="0.1" disabled="">
+                    </div>
+                    <div class="slider-group">
+                        <label> RGB B: <span class="value-display" id="gammaBValue">1</span> </label>
+                        <input type="range" id="gammaB" min="0.1" max="2" value="1.0" step="0.1" disabled="">
+                    </div>
+                    <div class="preset-buttons">
+                        <button class="preset-btn" data-preset="custom" disabled="">Standard</button>
+                        <button class="preset-btn" data-preset="standard" disabled="">Highlight</button>
+                        <button class="preset-btn" data-preset="retro" disabled="">Retro</button>
+                        <button class="preset-btn" data-preset="grayscale" disabled="">B&amp;W</button>
+                    </div>
+                    <div>
+                        <div>
+                            <button class="btn btn-secondary" id="resetBtn" style="width: 100%;" disabled="">Reset parameters</button>
+                        </div>
+                        <div class="action-buttons" style="margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap;">
+                            <button class="btn btn-secondary" id="showUploadBtn">Change Picture</button>
+                            <button class="btn btn-secondary" id="downloadBtn" disabled="">Download Picture</button>
+                            <button class="btn btn-secondary" id="loadFileBtn">Load Filter File</button>
+                            <button class="btn btn-primary" id="saveParamsBtn" disabled="">Download Filter (.pro/.air)</button>
+                        </div>
+                    </div>
+
+                    <!-- Hidden input for loading local files -->
+                    <input type="file" id="paramsFileInput" accept=".pro,.dld" style="display: none;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Essential Scripts for local functionality -->
+    <script src="./DIY-Camera-Filters-Offline-Complete_files/jquery-3.7.1.min.js.download"></script>
+    
+    <script>
+        // Toggle original/preview logic (Fixed container targeting)
+        document.addEventListener('DOMContentLoaded', function () {
+            const originalContainer = document.querySelector('#originalContainer');
+            const filteredContainer = document.querySelector('#filteredContainer');
+            const yulan = document.querySelector('.yulan');
+            let isOriginal = false;
+            
+            yulan.addEventListener("click", function () {
+                if (!isOriginal) {
+                    originalContainer.style.display = "block";
+                    filteredContainer.style.display = "none";
+                    yulan.textContent = "Viewing Original Image (Click to return to Preview)";
+                    yulan.style.backgroundColor = "#5cb85c"; // Visually distinguish states
+                    yulan.style.color = "white";
+                    isOriginal = true;
+                } else {
+                    originalContainer.style.display = "none";
+                    filteredContainer.style.display = "block";
+                    yulan.textContent = "Click to toggle original/preview";
+                    yulan.style.backgroundColor = ""; // Reset styles
+                    yulan.style.color = "";
+                    isOriginal = false;
+                }
+            })
+        });
+
+        // Popup logic (Using localStorage so it runs client-side)
+        $(document).ready(function () {
+            if (localStorage.getItem('popupShown') === 'true') {
+                $(".pop_up").hide()
+                return;
+            }
+            var $button = $('.buts_qd');
+            var $span = $button.find('span');
+            var countdown = 5;
+            var isCountdownFinished = false;
+            var timer = setInterval(function () {
+                countdown--;
+                $span.text(countdown + 's After confirmation');
+                if (countdown <= 0) {
+                    clearInterval(timer);
+                    isCountdownFinished = true;
+                    $span.text('Confirm');
+                    $button.prop('disabled', false);
+                }
+            }, 1000);
+            $button.prop('disabled', true);
+            $button.on('click', function () {
+                if (!isCountdownFinished) return false;
+                localStorage.setItem('popupShown', 'true');
+                $('.pop_up').fadeOut(300);
+            });
+        });
+
+        // Initialize Filter App and Vanilla Camera Selection
+        document.addEventListener('DOMContentLoaded', () => {
+            const filterApp = new SimpleFilterApp();
+            window.filterApp = filterApp;
+            
+            const cameraSelect = document.getElementById('cameraSelect');
+            cameraSelect.addEventListener('change', (e) => {
+                filterApp.changeRangeMode(e.target.value);
+            });
+            
+            // Set initial state to the selected default (D53)
+            filterApp.changeRangeMode(cameraSelect.value);
+        });
+
+        // Main filter engine logic
+        class SimpleFilterApp {
+            constructor() {
+                this.originalImage = null;
+                this.filteredCanvas = null;
+                this.filteredCtx = null;
+                this.isProcessing = false;
+                this.currentMode = null;
+                this.init();
+            }
+
+            changeRangeMode(mode) {
+                const normalizedMode = (mode === 'DC08Kamera') ? 'D72Kamera' : mode;
+                this.currentMode = normalizedMode;
+                this.updateFileInputAccept();
+
+                const rangeModes = {
+                    standard: {
+                        brightness: { min: -255, max: 255, step: 1 },
+                        contrast: { min: 0, max: 2, step: 0.1 },
+                        saturation: { min: 0, max: 4, step: 0.1 },
+                        hue: { min: 0, max: 360, step: 1 },
+                        gammaR: { min: 0.1, max: 2, step: 0.1 },
+                        gammaG: { min: 0.1, max: 2, step: 0.1 },
+                        gammaB: { min: 0.1, max: 2, step: 0.1 }
+                    },
+                    D72Kamera: {
+                        brightness: { min: 0, max: 255, step: 1 },
+                        contrast: { min: 0, max: 255, step: 1 },
+                        saturation: { min: 0, max: 2.0, step: 0.01 },
+                        hue: { min: -180, max: 180, step: 5 },
+                        gammaR: { min: 0.1, max: 2, step: 0.1 },
+                        gammaG: { min: 0.1, max: 2, step: 0.1 },
+                        gammaB: { min: 0.1, max: 2, step: 0.1 }
+                    }
+                };
+
+                const config = rangeModes[normalizedMode] || rangeModes.standard;
+                let defaultValues = (normalizedMode === 'D72Kamera') 
+                    ? { brightness: 128, contrast: 128, saturation: 1.0, hue: 0, gammaR: 1.0, gammaG: 1.0, gammaB: 1.0 }
+                    : { brightness: 0, contrast: 1.0, saturation: 1.0, hue: 0, gammaR: 1.0, gammaG: 1.0, gammaB: 1.0 };
+
+                Object.keys(config).forEach(sliderId => {
+                    const slider = document.getElementById(sliderId);
+                    const range = config[sliderId];
+                    if (slider) {
+                        slider.min = range.min;
+                        slider.max = range.max;
+                        slider.step = range.step;
+                        slider.value = defaultValues[sliderId];
+                        const valueDisplay = document.getElementById(sliderId + 'Value');
+                        if (valueDisplay) valueDisplay.textContent = defaultValues[sliderId];
+                        slider.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                });
+                this.applyFilters();
+            }
+
+            loadDefaultImage(src) {
+                const defaultImg = new Image();
+                defaultImg.onload = () => {
+                    this.showImagePreview(defaultImg);
+                    this.originalImage = defaultImg;
+                    this.setupFilterCanvas(defaultImg);
+                    this.applyFilters();
+                    this.disableControls(false);
+                };
+                defaultImg.src = src;
+            }
+
+            showUploadArea() {
+                document.getElementById('uploadArea').style.display = 'block';
+                document.getElementById('imagePreview').style.display = 'none';
+                this.resetFilters();
+            }
+
+            getFileExtensionByMode(mode) {
+                const proSeries = ['fine', 'professional', 'newV08Pro', 'extended'];
+                const airSeries = ['D72Kamera'];
+                if (proSeries.includes(mode)) return '.pro';
+                else if (airSeries.includes(mode)) return '.air';
+                else return '.dld';
+            }
+
+            saveParameters() {
+                const parameters = {
+                    brightness: parseInt(document.getElementById('brightness').value),
+                    contrast: parseFloat(document.getElementById('contrast').value),
+                    saturation: parseFloat(document.getElementById('saturation').value),
+                    hue: parseInt(document.getElementById('hue').value),
+                    gammaR: parseFloat(document.getElementById('gammaR').value),
+                    gammaG: parseFloat(document.getElementById('gammaG').value),
+                    gammaB: parseFloat(document.getElementById('gammaB').value)
+                };
+
+                let content = "";
+                const isD72OrDC08 = (this.currentMode === 'D72Kamera');
+
+                if (isD72OrDC08 && window.D72KameraFilters) {
+                    content = window.D72KameraFilters.generateD72ParameterFile(parameters);
+                } else {
+                    content += `${parameters.brightness}, ${parameters.contrast.toFixed(2)}, ${parameters.saturation.toFixed(2)}, ${parameters.hue}, ${parameters.gammaR.toFixed(2)}, ${parameters.gammaG.toFixed(2)}, ${parameters.gammaB.toFixed(2)}\n`;
+                    const colorMatrix = this.generateColorMatrix(parameters);
+                    content += `${colorMatrix[0]}, ${colorMatrix[1]}, ${colorMatrix[2]}, \n`;
+                    content += `${colorMatrix[3]}, ${colorMatrix[4]}, ${colorMatrix[5]}, \n`;
+                    content += `${colorMatrix[6]}, ${colorMatrix[7]}, ${colorMatrix[8]}\n`;
+                    const lutR = this.generateLUT(parameters, 'R');
+                    const lutG = this.generateLUT(parameters, 'G');
+                    const lutB = this.generateLUT(parameters, 'B');
+                    content += lutR.join(', ') + '\n' + lutG.join(', ') + '\n' + lutB.join(', ') + '\n';
+                }
+
+                const fileExtension = this.getFileExtensionByMode(this.currentMode);
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = 'camera' + fileExtension;
+                link.href = url;
+                link.click();
+                URL.revokeObjectURL(url);
+            }
+
+            generateColorMatrix(parameters) {
+                const ccMatrix = [[0,0,0],[0,0,0],[0,0,0]];
+                if (window.V105Filters && window.V105Filters.makeCCMatrix) {
+                    window.V105Filters.makeCCMatrix(parameters.saturation, parameters.hue, ccMatrix);
+                    return [
+                        Math.round(ccMatrix[0][0]*1024), Math.round(ccMatrix[0][1]*1024), Math.round(ccMatrix[0][2]*1024),
+                        Math.round(ccMatrix[1][0]*1024), Math.round(ccMatrix[1][1]*1024), Math.round(ccMatrix[1][2]*1024),
+                        Math.round(ccMatrix[2][0]*1024), Math.round(ccMatrix[2][1]*1024), Math.round(ccMatrix[2][2]*1024)
+                    ];
+                }
+                const sat = parameters.saturation, rw = 0.3086, gw = 0.6094, bw = 0.0820;
+                const matrix = [
+                    (1.0-sat)*rw+sat, (1.0-sat)*rw, (1.0-sat)*rw,
+                    (1.0-sat)*gw, (1.0-sat)*gw+sat, (1.0-sat)*gw,
+                    (1.0-sat)*bw, (1.0-sat)*bw, (1.0-sat)*bw+sat
+                ];
+                return matrix.map(v => Math.round(v * 1024));
+            }
+
+            generateLUT(parameters, channel) {
+                const segDLookupTable = new Array(256);
+                for (let i=0; i<256; i++) segDLookupTable[i] = [0,0,0];
+                if (window.V105Filters && window.V105Filters.makeSegDLookupTable) {
+                    window.V105Filters.makeSegDLookupTable(
+                        parameters.brightness, parameters.contrast,
+                        parameters.gammaR, parameters.gammaG, parameters.gammaB, segDLookupTable
+                    );
+                    const idx = channel === 'R' ? 0 : channel === 'G' ? 1 : 2;
+                    return segDLookupTable.map(item => Math.round(item[idx]));
+                }
+                const lut = [];
+                const gamma = channel === 'R' ? parameters.gammaR : channel === 'G' ? parameters.gammaG : parameters.gammaB;
+                for (let i = 0; i < 256; i++) {
+                    let value = Math.pow(i / 255, 1 / gamma) * 255;
+                    value = value + parameters.brightness;
+                    value = (value - 128) * parameters.contrast + 128;
+                    value = Math.max(0, Math.min(255, value));
+                    lut.push(Math.round(value));
+                }
+                return lut;
+            }
+
+            loadParameters(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const allowedExtensions = this.currentMode ? [this.getFileExtensionByMode(this.currentMode), '.dld'] : ['.dld'];
+                if (!allowedExtensions.some(ext => file.name.toLowerCase().endsWith(ext))) {
+                    alert(`Invalid file extension! Supported: ${allowedExtensions.join(', ')}`);
+                    event.target.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const content = e.target.result;
+                        const lines = content.split('\n').filter(l => l.trim() !== '');
+                        const basicParams = lines[0].split(',').map(p => parseFloat(p.trim()));
+                        const params = {
+                            brightness: Math.round(basicParams[0]),
+                            contrast: parseFloat(basicParams[1].toFixed(2)),
+                            saturation: parseFloat(basicParams[2].toFixed(2)),
+                            hue: Math.round(basicParams[3]),
+                            gammaR: parseFloat(basicParams[4].toFixed(2)),
+                            gammaG: parseFloat(basicParams[5].toFixed(2)),
+                            gammaB: parseFloat(basicParams[6].toFixed(2))
+                        };
+                        ['brightness', 'contrast', 'saturation', 'hue', 'gammaR', 'gammaG', 'gammaB'].forEach(key => {
+                            document.getElementById(key).value = params[key];
+                            document.getElementById(key + 'Value').textContent = params[key];
+                        });
+                        this.applyFilters();
+                    } catch (error) {
+                        alert('Error reading parameter file. Format mismatch.');
+                    }
+                    event.target.value = '';
+                };
+                reader.readAsText(file);
+            }
+
+            init() {
+                this.bindEvents();
+                this.disableControls(true);
+                this.updateFileInputAccept();
+            }
+
+            updateFileInputAccept() {
+                const input = document.getElementById('paramsFileInput');
+                input.accept = this.currentMode ? `${this.getFileExtensionByMode(this.currentMode)},.dld` : '.dld';
+            }
+
+            bindEvents() {
+                document.querySelectorAll('.thumbnail-item').forEach(thumb => {
+                    thumb.addEventListener('click', (e) => {
+                        this.loadDefaultImage(e.currentTarget.dataset.src);
+                    });
+                });
+                
+                const uploadArea = document.getElementById('uploadArea');
+                const fileInput = document.getElementById('fileInput');
+                const paramsFileInput = document.getElementById('paramsFileInput');
+
+                uploadArea.addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
+                uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+                uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('drag-over');
+                    if (e.dataTransfer.files[0] && e.dataTransfer.files[0].type.startsWith('image/')) {
+                        this.processFile(e.dataTransfer.files[0]);
+                    }
+                });
+
+                ['brightness', 'contrast', 'saturation', 'hue', 'gammaR', 'gammaG', 'gammaB'].forEach(id => {
+                    document.getElementById(id).addEventListener('input', (e) => {
+                        document.getElementById(id + 'Value').textContent = e.target.value;
+                        this.applyFilters();
+                    });
+                });
+
+                document.querySelectorAll('.preset-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.applyPreset(e.target.dataset.preset));
+                });
+
+                document.getElementById('resetBtn').addEventListener('click', () => this.resetFilters());
+                document.getElementById('downloadBtn').addEventListener('click', () => this.downloadImage());
+                document.getElementById('saveParamsBtn').addEventListener('click', () => this.saveParameters());
+                document.getElementById('loadFileBtn').addEventListener('click', () => paramsFileInput.click());
+                paramsFileInput.addEventListener('change', (e) => this.loadParameters(e));
+                document.getElementById('showUploadBtn').addEventListener('click', () => this.showUploadArea());
+            }
+
+            handleFileSelect(e) {
+                const file = e.target.files[0];
+                if (file && file.type.startsWith('image/')) this.processFile(file);
+                e.target.value = '';
+            }
+
+            processFile(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const image = new Image();
+                    image.onload = () => {
+                        this.showImagePreview(image);
+                        this.originalImage = image;
+                        this.setupFilterCanvas(image);
+                        this.applyFilters();
+                        this.disableControls(false);
+                    };
+                    image.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            showImagePreview(image) {
+                document.getElementById('uploadArea').style.display = 'none';
+                document.getElementById('imagePreview').style.display = 'block';
+                const canvas = document.getElementById('previewCanvas');
+                const ctx = canvas.getContext('2d');
+                const scale = Math.min(800 / image.width, 1);
+                canvas.width = image.width * scale;
+                canvas.height = image.height * scale;
+                ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+            }
+
+            setupFilterCanvas(image) {
+                const canvas = document.getElementById('filteredImage');
+                this.filteredCanvas = canvas;
+                this.filteredCtx = canvas.getContext('2d');
+                const scale = 800 / image.width;
+                canvas.width = 800;
+                canvas.height = image.height * scale;
+                this.filteredCtx.imageSmoothingEnabled = true;
+                this.filteredCtx.drawImage(image, 0, 0, canvas.width, canvas.height);
+            }
+
+            applyFilters() {
+                if (!this.originalImage || this.isProcessing) return;
+                this.isProcessing = true;
+                
+                try {
+                    const filters = {
+                        brightness: parseInt(document.getElementById('brightness').value),
+                        contrast: parseFloat(document.getElementById('contrast').value),
+                        saturation: parseFloat(document.getElementById('saturation').value),
+                        hue: parseInt(document.getElementById('hue').value),
+                        gammaR: parseFloat(document.getElementById('gammaR').value),
+                        gammaG: parseFloat(document.getElementById('gammaG').value),
+                        gammaB: parseFloat(document.getElementById('gammaB').value)
+                    };
+                    this.filteredCtx.drawImage(this.originalImage, 0, 0, this.filteredCanvas.width, this.filteredCanvas.height);
+                    
+                    // THIS IS WHERE THE CORS ERROR HAPPENS.
+                    // If it errors, execution skips to catch block, and finishes in finally block.
+                    const imageData = this.filteredCtx.getImageData(0, 0, this.filteredCanvas.width, this.filteredCanvas.height);
+                    
+                    this.applyV105Filters(imageData.data, this.filteredCanvas.width, this.filteredCanvas.height, filters);
+                    this.filteredCtx.putImageData(imageData, 0, 0);
+                    
+                } catch (error) {
+                    console.error("Filter engine error:", error);
+                    if (error.name === 'SecurityError' || error.message.includes('tainted')) {
+                        // Resets to initial upload state
+                        this.showUploadArea();
+                        alert("Browser Security Restriction!\n\nYou are running this offline (file://). Browsers block canvas manipulation on local images loaded from thumbnails.\n\nTo use the filters, click 'Change Picture' and manually upload an image from your computer.");
+                    }
+                } finally {
+                    this.isProcessing = false;
+                }
+            }
+
+            applyV105Filters(pixels, width, height, filters) {
+                if ((this.currentMode === 'D72Kamera' || this.currentMode === 'DC08Kamera') && window.D72KameraFilters) {
+                    window.D72KameraFilters.applyD72Filters(pixels, width, height, filters);
+                    return;
+                }
+                const tempPixels = new Float32Array(pixels.length);
+                for (let i = 0; i < pixels.length; i++) tempPixels[i] = pixels[i];
+
+                const ccMatrix = [[0,0,0],[0,0,0],[0,0,0]];
+                if (window.V105Filters && window.V105Filters.makeCCMatrix) {
+                    window.V105Filters.makeCCMatrix(filters.saturation, filters.hue, ccMatrix);
+                }
+
+                for (let i = 0; i < pixels.length; i += 4) {
+                    const r = tempPixels[i] / 255.0, g = tempPixels[i + 1] / 255.0, b = tempPixels[i + 2] / 255.0;
+                    tempPixels[i] = Math.max(0, Math.min(255, (ccMatrix[0][0]*r + ccMatrix[0][1]*g + ccMatrix[0][2]*b) * 255));
+                    tempPixels[i+1] = Math.max(0, Math.min(255, (ccMatrix[1][0]*r + ccMatrix[1][1]*g + ccMatrix[1][2]*b) * 255));
+                    tempPixels[i+2] = Math.max(0, Math.min(255, (ccMatrix[2][0]*r + ccMatrix[2][1]*g + ccMatrix[2][2]*b) * 255));
+                }
+
+                const segDLookupTable = new Array(256);
+                for (let i = 0; i < 256; i++) segDLookupTable[i] = [0,0,0];
+
+                if (window.V105Filters && window.V105Filters.makeSegDLookupTable) {
+                    window.V105Filters.makeSegDLookupTable(filters.brightness, filters.contrast, filters.gammaR, filters.gammaG, filters.gammaB, segDLookupTable);
+                    const intPixels = new Uint8ClampedArray(pixels.length);
+                    for (let i = 0; i < tempPixels.length; i++) intPixels[i] = Math.round(tempPixels[i]);
+                    window.V105Filters.applySegDLookupTableRGBA(intPixels, width, height, segDLookupTable);
+                    for (let i = 0; i < pixels.length; i++) pixels[i] = intPixels[i];
+                }
+            }
+
+            applyPreset(presetName) {
+                const presets = this.currentMode === 'D72Kamera' ? {
+                    custom: { brightness: 128, contrast: 128, saturation: 1.0, hue: 0, gammaR: 1.0, gammaG: 1.0, gammaB: 1.0 },
+                    standard: { brightness: 150, contrast: 140, saturation: 1.0, hue: 0, gammaR: 1.0, gammaG: 1.0, gammaB: 1.0 },
+                    retro: { brightness: 110, contrast: 140, saturation: 1, hue: -5, gammaR: 1, gammaG: 1, gammaB: 0.9 },
+                    grayscale: { brightness: 128, contrast: 128, saturation: 0, hue: 0, gammaR: 1.0, gammaG: 1.0, gammaB: 1.0 }
+                } : {
+                    custom: { brightness: 0, contrast: 1.0, saturation: 1.0, hue: 0, gammaR: 1.0, gammaG: 1.0, gammaB: 1.0 },
+                    standard: { brightness: 15, contrast: 1.15, saturation: 1.05, hue: 0, gammaR: 1.05, gammaG: 1.0, gammaB: 0.95 },
+                    retro: { brightness: -20, contrast: 1.25, saturation: 0.85, hue: 15, gammaR: 1.15, gammaG: 1.1, gammaB: 0.85 },
+                    grayscale: { brightness: 5, contrast: 1.1, saturation: 0, hue: 0, gammaR: 1.0, gammaG: 1.0, gammaB: 1.0 }
+                };
+
+                const preset = presets[presetName] || presets.custom;
+                Object.keys(preset).forEach(key => {
+                    document.getElementById(key).value = preset[key];
+                    document.getElementById(key + 'Value').textContent = preset[key];
+                });
+                this.applyFilters();
+            }
+
+            resetFilters() {
+                this.applyPreset('custom');
+            }
+
+            downloadImage() {
+                if (!this.filteredCanvas) return;
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCanvas.width = this.originalImage.width;
+                tempCanvas.height = this.originalImage.height;
+                tempCtx.drawImage(this.originalImage, 0, 0, tempCanvas.width, tempCanvas.height);
+
+                const filters = {
+                    brightness: parseInt(document.getElementById('brightness').value),
+                    contrast: parseFloat(document.getElementById('contrast').value),
+                    saturation: parseFloat(document.getElementById('saturation').value),
+                    hue: parseInt(document.getElementById('hue').value),
+                    gammaR: parseFloat(document.getElementById('gammaR').value),
+                    gammaG: parseFloat(document.getElementById('gammaG').value),
+                    gammaB: parseFloat(document.getElementById('gammaB').value)
+                };
+
+                const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+                this.applyV105Filters(imageData.data, tempCanvas.width, tempCanvas.height, filters);
+                tempCtx.putImageData(imageData, 0, 0);
+
+                const link = document.createElement('a');
+                link.download = 'camera.png';
+                link.href = tempCanvas.toDataURL('image/png');
+                link.click();
+            }
+
+            disableControls(disabled) {
+                document.querySelectorAll('input[type="range"]').forEach(s => s.disabled = disabled);
+                document.querySelectorAll('.preset-btn, .btn').forEach(btn => {
+                    if (btn.id !== 'loadFileBtn' && btn.id !== 'showUploadBtn') btn.disabled = disabled;
+                });
+            }
+        }
+    </script>
+
+</body></html>
