@@ -37,7 +37,7 @@ By using this tool, you acknowledge that you are loading third-party files onto 
 
 ### Installing on your Camera
 1. Copy the downloaded `.pro` or `.air` file to the root directory of your camera's SD card.
-2. Turn on the camera. You should briefly see a "LOAD" message on the screen.
+2. Turn on the camera. That filter should be automatically applied to photos. The easiest way to verify this works is use a B&W filter and then swap it after a few test photos. You could also consider using multiple SD cards each with a unique filter if you want variety. 
 3. *Note: Most cameras can only load one custom file at a time.*
 
 ## 🛠️ Technical Details (Offline Verification)
