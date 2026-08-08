@@ -28,7 +28,7 @@ By using this tool, you acknowledge that you are loading third-party files onto 
 
 ## 🚀 How to Use
 
-1. **Download/Clone** this repository to your local machine.
+1. **Download/Clone** this repository to your local machine. Simply download the `DIY-Camera-Filters-Offline-Complete.html` file. If you are on Windows you might need to right-click, select properties, and unblock the file from working considering that it has Javascript code inside. 
 2. **Open the HTML file** (e.g., `DIY-Camera-Filters-Offline-Complete.html`) directly in your web browser (Chrome, Firefox, Safari, Edge).
 3. **Upload an Image**: Because this tool runs completely locally (`file://`), modern browsers block canvas manipulations on the pre-loaded thumbnails for security reasons. Click **"Change Picture"** and upload a photo from your computer to use as a preview base.
 4. **Select your Camera Model** from the dropdown.
