@@ -4,6 +4,8 @@ A fully offline, browser-based tool to create, edit, and preview custom color fi
 
 This project was extracted from a semi-local web tool and modified using AI to completely remove all online/cloud dependencies. It allows you to generate filter files (`.pro`, `.air`, `.dld`) entirely locally on your machine without relying on a website, internet connection, or server.
 
+I did limited testing with the Maxmango D53 camera by selecting the B&W option, exporting the filter, and adding it to the SD card's base direction. That worked. I haven't testing anything else at this point. 
+
 ## ⚠️ Disclaimer & Liability
 
 **USE AT YOUR OWN RISK.** 
