@@ -1,0 +1,313 @@
+(function () {
+    'use strict';
+
+    // 全局D72相机滤镜对象
+    window.D72KameraFilters = {
+        /**
+         * 应用D72相机滤镜到图像数据
+         * @param {Uint8ClampedArray} pixels - 图像像素数据
+         * @param {number} width - 图像宽度
+         * @param {number} height - 图像高度
+         * @param {Object} filters - 滤镜参数对象
+         */
+        applyD72Filters: function(pixels, width, height, filters) {
+            // 1. 先应用CCM矩阵（颜色校正）
+            this.applyCCMMatrix(pixels, filters.saturation, filters.hue);
+            
+            // 2. 再应用曝光调整（亮度+对比度）
+            this.applyExposureCorrection(pixels, filters.brightness, filters.contrast);
+            
+            // 3. 最后应用Gamma校正
+            this.applyGammaCorrection(pixels, filters.gammaR, filters.gammaG, filters.gammaB);
+        },
+
+        applyCCMMatrix: function(pixels, saturation, hue) {
+            // 生成正确的CCM矩阵（-512到511范围）
+            const ccmMatrix = this.generateCorrectCCMMatrix(saturation, hue);
+            
+            // 将矩阵值转换为浮点数（除以256）
+            const ccmFloat = [
+                ccmMatrix[0] / 256.0, ccmMatrix[1] / 256.0, ccmMatrix[2] / 256.0,
+                ccmMatrix[3] / 256.0, ccmMatrix[4] / 256.0, ccmMatrix[5] / 256.0,
+                ccmMatrix[6] / 256.0, ccmMatrix[7] / 256.0, ccmMatrix[8] / 256.0
+            ];
+            
+            for (let i = 0; i < pixels.length; i += 4) {
+                const r = pixels[i] / 255.0;
+                const g = pixels[i + 1] / 255.0;
+                const b = pixels[i + 2] / 255.0;
+                
+                // 应用CCM矩阵：output = matrix * input
+                const newR = ccmFloat[0] * r + ccmFloat[1] * g + ccmFloat[2] * b;
+                const newG = ccmFloat[3] * r + ccmFloat[4] * g + ccmFloat[5] * b;
+                const newB = ccmFloat[6] * r + ccmFloat[7] * g + ccmFloat[8] * b;
+                
+                // 转换回0-255范围并限制
+                pixels[i] = this.clamp(newR * 255);
+                pixels[i + 1] = this.clamp(newG * 255);
+                pixels[i + 2] = this.clamp(newB * 255);
+            }
+        },
+
+        generateCorrectCCMMatrix: function(saturation, hue) {
+            // 饱和度为1，色调为0时，返回单位矩阵 * 256
+            if (Math.abs(saturation - 1.0) < 0.01 && Math.abs(hue) < 0.1) {
+                return [256, 0, 0, 0, 256, 0, 0, 0, 256];
+            }
+            
+            // 饱和度为0时，返回灰度矩阵（85,85,85）
+            if (saturation <= 0.01) {
+                return [85, 85, 85, 85, 85, 85, 85, 85, 85];
+            }
+            
+            // 标准亮度权重
+            const luminanceR = 0.299;
+            const luminanceG = 0.587;
+            const luminanceB = 0.114;
+            
+            // 修正的饱和度矩阵公式
+            const s = Math.max(0, Math.min(2.0, saturation));
+            const satMatrix = [
+                luminanceR * (1 - s) + s, luminanceG * (1 - s),     luminanceB * (1 - s),
+                luminanceR * (1 - s),     luminanceG * (1 - s) + s, luminanceB * (1 - s),
+                luminanceR * (1 - s),     luminanceG * (1 - s),     luminanceB * (1 - s) + s
+            ];
+            
+            // 如果有色调调整，应用色调旋转
+            let finalMatrix = satMatrix;
+            if (Math.abs(hue) > 0.1) {
+                const hueRad = hue * Math.PI / 180;
+                const cosH = Math.cos(hueRad);
+                const sinH = Math.sin(hueRad);
+                
+                // 色调旋转矩阵 - 使用RGB旋转矩阵
+                const hueMatrix = [
+                    0.299 + 0.701 * cosH + 0.168 * sinH,
+                    0.587 - 0.587 * cosH + 0.330 * sinH,
+                    0.114 - 0.114 * cosH - 0.497 * sinH,
+                    0.299 - 0.299 * cosH - 0.328 * sinH,
+                    0.587 + 0.413 * cosH + 0.035 * sinH,
+                    0.114 - 0.114 * cosH + 0.292 * sinH,
+                    0.299 - 0.300 * cosH + 1.250 * sinH,
+                    0.587 - 0.588 * cosH - 1.050 * sinH,
+                    0.114 + 0.886 * cosH - 0.203 * sinH
+                ];
+                
+                // 矩阵相乘：饱和度矩阵 × 色调矩阵
+                finalMatrix = this.multiplyMatrices(satMatrix, hueMatrix);
+            }
+            
+            // 将矩阵值乘以256并取整，限制在-512到511范围内
+            const intMatrix = finalMatrix.map(value => {
+                let intValue = Math.round(value * 256);
+                return Math.max(-512, Math.min(511, intValue));
+            });
+            
+            return intMatrix;
+        },
+
+        applyExposureCorrection: function(pixels, brightness, contrast) {
+            // D72相机：brightness和contrast范围都是0-255
+            // 亮度调整系数：(brightness-128)/128
+            const brightnessFactor = (brightness - 128) / 128.0;
+            
+            // 对比度调整系数：contrast/128
+            const contrastFactor = contrast / 128.0;
+            
+            for (let i = 0; i < pixels.length; i += 4) {
+                let r = pixels[i];
+                let g = pixels[i + 1];
+                let b = pixels[i + 2];
+                
+                // 先应用对比度
+                r = this.applyContrast(r, contrastFactor);
+                g = this.applyContrast(g, contrastFactor);
+                b = this.applyContrast(b, contrastFactor);
+                
+                // 再应用亮度调整
+                r = this.applyBrightness(r, brightnessFactor);
+                g = this.applyBrightness(g, brightnessFactor);
+                b = this.applyBrightness(b, brightnessFactor);
+                
+                pixels[i] = this.clamp(r);
+                pixels[i + 1] = this.clamp(g);
+                pixels[i + 2] = this.clamp(b);
+            }
+        },
+
+        /**
+         * 应用曝光调整（D72特殊处理）
+         * @param {Uint8ClampedArray} pixels - 像素数据
+         * @param {number} brightness - 亮度值 (0-255)
+         * @param {number} contrast - 对比度值 (0-255)
+         */
+        applyExposure: function (pixels, brightness, contrast) {
+            // D72相机：brightness和contrast范围都是0-255，128为中性值
+            // 将brightness从0-255映射到-1到1
+            const normalizedBrightness = (brightness - 128) / 128;
+
+            // 将contrast从0-255映射到0.5到1.5（更合理的范围）
+            const normalizedContrast = 0.5 + (contrast / 255) * 1.0;
+
+            for (let i = 0; i < pixels.length; i += 4) {
+                let r = pixels[i];
+                let g = pixels[i + 1];
+                let b = pixels[i + 2];
+
+                // 先应用对比度
+                r = this.applyContrast(r, normalizedContrast);
+                g = this.applyContrast(g, normalizedContrast);
+                b = this.applyContrast(b, normalizedContrast);
+
+                // 然后应用亮度调整
+                r = this.applyBrightness(r, normalizedBrightness);
+                g = this.applyBrightness(g, normalizedBrightness);
+                b = this.applyBrightness(b, normalizedBrightness);
+
+                pixels[i] = this.clamp(r);
+                pixels[i + 1] = this.clamp(g);
+                pixels[i + 2] = this.clamp(b);
+            }
+        },
+
+        /**
+         * 应用对比度调整到单个通道
+         */
+        applyContrast: function(value, contrast) {
+            // 对比度公式: (value - 128) * contrast + 128
+            return (value - 128) * contrast + 128;
+        },
+
+        /**
+         * 应用亮度调整到单个通道
+         */
+        applyBrightness: function(value, brightness) {
+            // 亮度调整: value * (1 + brightness)
+            return value * (1 + brightness);
+        },
+
+        applyGammaCorrection: function(pixels, gammaR, gammaG, gammaB) {
+            // 为每个通道生成Gamma查找表（256个值）
+            const gammaTableR = this.generateGammaTable256(gammaR);
+            const gammaTableG = this.generateGammaTable256(gammaG);
+            const gammaTableB = this.generateGammaTable256(gammaB);
+            
+            for (let i = 0; i < pixels.length; i += 4) {
+                pixels[i] = gammaTableR[pixels[i]];
+                pixels[i + 1] = gammaTableG[pixels[i + 1]];
+                pixels[i + 2] = gammaTableB[pixels[i + 2]];
+            }
+        },
+
+        generateGammaTable256: function(gamma) {
+            const table = new Uint8Array(256);
+            const safeGamma = Math.max(0.1, Math.min(3.0, gamma));
+            
+            for (let i = 0; i < 256; i++) {
+                let corrected = Math.pow(i / 255, 1 / safeGamma);
+                table[i] = this.clamp(corrected * 255);
+            }
+            
+            return table;
+        },
+
+        /**
+         * 矩阵乘法（3×3）
+         */
+        multiplyMatrices: function (a, b) {
+            return [
+                a[0] * b[0] + a[1] * b[3] + a[2] * b[6],
+                a[0] * b[1] + a[1] * b[4] + a[2] * b[7],
+                a[0] * b[2] + a[1] * b[5] + a[2] * b[8],
+                a[3] * b[0] + a[4] * b[3] + a[5] * b[6],
+                a[3] * b[1] + a[4] * b[4] + a[5] * b[7],
+                a[3] * b[2] + a[4] * b[5] + a[5] * b[8],
+                a[6] * b[0] + a[7] * b[3] + a[8] * b[6],
+                a[6] * b[1] + a[7] * b[4] + a[8] * b[7],
+                a[6] * b[2] + a[7] * b[5] + a[8] * b[8]
+            ];
+        },
+
+        /**
+         * 限制数值在0-255范围内
+         */
+        clamp: function (value) {
+            return Math.max(0, Math.min(255, Math.round(value)));
+        },
+
+        /**
+         * 生成D72相机参数文件内容
+         */
+        generateD72ParameterFile: function(parameters) {
+            let content = "";
+            
+            // 第一行：7个基本参数
+            content += `${parameters.brightness}, ${parameters.contrast}, ${parameters.saturation.toFixed(2)}, ${parameters.hue}, ${parameters.gammaR.toFixed(2)}, ${parameters.gammaG.toFixed(2)}, ${parameters.gammaB.toFixed(2)}\n`;
+            
+            // 第二至四行：CCM矩阵
+            const ccmMatrix = this.generateCorrectCCMMatrix(parameters.saturation, parameters.hue);
+            content += `${ccmMatrix[0]}, ${ccmMatrix[1]}, ${ccmMatrix[2]},\n`;
+            content += `${ccmMatrix[3]}, ${ccmMatrix[4]}, ${ccmMatrix[5]},\n`;
+            content += `${ccmMatrix[6]}, ${ccmMatrix[7]}, ${ccmMatrix[8]}\n`;
+            
+            // 第五至七行：Gamma表（每行1024个十进制值，0-4095）
+            const gammaTableR = this.generateGammaTable1024(parameters.gammaR);
+            const gammaTableG = this.generateGammaTable1024(parameters.gammaG);
+            const gammaTableB = this.generateGammaTable1024(parameters.gammaB);
+            
+            // 格式化输出，每行128个值（8行 = 1024个值）
+            content += this.formatGammaTableDecimal(gammaTableR, 128, 8);
+            content += this.formatGammaTableDecimal(gammaTableG, 128, 8);
+            content += this.formatGammaTableDecimal(gammaTableB, 128, 8);
+            
+            return content;
+        },
+
+        /**
+         * 生成1024个值的Gamma表（0-4095）
+         */
+        generateGammaTable1024: function(gamma, size = 1024) {
+            const table = [];
+            const safeGamma = Math.max(0.1, Math.min(3.0, gamma));
+            
+            for (let i = 0; i < size; i++) {
+                const normalized = i / (size - 1);
+                let corrected = Math.pow(normalized, 1 / safeGamma);
+                let value = Math.round(corrected * 4095);
+                value = Math.max(0, Math.min(4095, value));
+                table.push(value);
+            }
+            
+            return table;
+        },
+
+        formatGammaTableDecimal: function(table, valuesPerLine, lines) {
+            let content = "";
+            
+            for (let line = 0; line < lines; line++) {
+                const startIdx = line * valuesPerLine;
+                const endIdx = startIdx + valuesPerLine;
+                
+                const lineValues = [];
+                for (let i = startIdx; i < endIdx && i < table.length; i++) {
+                    lineValues.push(table[i]);
+                }
+                
+                if (lineValues.length > 0) {
+                    content += lineValues.join(', ');
+                    if (line < lines - 1) {
+                        content += ',\n';
+                    } else {
+                        content += '\n';
+                    }
+                }
+            }
+            
+            return content;
+        },
+
+        // 其他辅助方法可以保留...
+    };
+
+    console.log('D72相机滤镜模块已加载 (修正饱和度矩阵)');
+})();
